@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Александр — Разработка · 3D · Обучение</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0F2138;
+    --bg-deep: #0A1828;
+    --panel: #15314D;
+    --panel-2: #1B3B5C;
+    --line: #2C5276;
+    --line-soft: rgba(191,227,240,0.10);
+    --ink: #EAF4FF;
+    --muted: #7E9CB5;
+    --muted-2: #5A7E9B;
+    --accent: #FF6B4A;
+    --accent-dim: rgba(255,107,74,0.16);
+    --accent-2: #F2C94C;
+    --radius: 2px;
+    --maxw: 1080px;
+    --sheet-pad: clamp(24px, 6vw, 64px);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; margin:0; font-weight:600; letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+
+  :focus-visible{
+    outline:2px solid var(--accent-2);
+    outline-offset:3px;
+  }
+
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 var(--sheet-pad);}
+
+  /* ---------- Nav ---------- */
+  .nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    background:rgba(10,24,40,0.72);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav-inner{
+    max-width:var(--maxw); margin:0 auto; padding:14px var(--sheet-pad);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .nav-mark{font-family:'Space Grotesk'; font-weight:700; font-size:15px; letter-spacing:0.04em;}
+  .nav-mark .dot{color:var(--accent);}
+  .nav-links{display:flex; gap:28px; font-size:13px; color:var(--muted);}
+  .nav-links a{transition:color .2s;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{
+    font-size:13px; padding:8px 16px; border:1px solid var(--accent);
+    color:var(--accent); border-radius:var(--radius); transition:all .2s;
+  }
+  .nav-cta:hover{background:var(--accent); color:var(--bg-deep);}
+  @media (max-width: 720px){ .nav-links{display:none;} }
+
+  /* ---------- Sheet header (used per-section) ---------- */
+  .sheet-label{
+    display:flex; align-items:baseline; gap:14px;
+    margin-bottom:20px;
+  }
+  .sheet-label .num{font-family:'JetBrains Mono'; font-size:13px; color:var(--accent); letter-spacing:0.06em;}
+  .sheet-label .rule{flex:1; height:1px; background:var(--line);}
+  .sheet-label .name{font-family:'JetBrains Mono'; font-size:12px; color:var(--muted-2); letter-spacing:0.08em; text-transform:uppercase;}
+
+  section{padding:100px 0; position:relative;}
+  section + section{border-top:1px solid var(--line-soft);}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+    padding-top:140px; padding-bottom:80px;
+  }
+  .hero-eyebrow{
+    font-family:'JetBrains Mono'; font-size:13px; color:var(--muted);
+    letter-spacing:0.08em; margin-bottom:28px; display:flex; gap:10px; align-items:center;
+  }
+  .hero-eyebrow .blink{
+    width:6px; height:6px; border-radius:50%; background:var(--accent);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+
+  .hero-name{
+    font-size:clamp(56px, 13vw, 132px);
+    line-height:0.95;
+    position:relative;
+    display:inline-block;
+  }
+  .hero-name .mark{
+    position:absolute; left:-2%; right:-2%; bottom:-0.06em; height:0.22em;
+    z-index:-1;
+  }
+  .hero-name svg{width:100%; height:100%; display:block;}
+  .hero-name path{
+    fill:none; stroke:var(--accent); stroke-width:10; stroke-linecap:round;
+    stroke-dasharray:1000; stroke-dashoffset:1000;
+    animation:draw 1.1s 0.5s cubic-bezier(.65,0,.35,1) forwards;
+  }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+
+  .hero-tags{
+    margin-top:28px; display:flex; gap:0; flex-wrap:wrap;
+    font-family:'JetBrains Mono'; font-size:15px; color:var(--ink);
+  }
+  .hero-tags span{padding:0 16px 0 0; position:relative;}
+  .hero-tags span:not(:last-child)::after{content:"·"; position:absolute; right:6px; color:var(--muted-2);}
+
+  .hero-text{
+    margin-top:36px; max-width:540px; color:var(--muted); font-size:17px;
+  }
+
+  .hero-actions{display:flex; gap:14px; margin-top:44px; flex-wrap:wrap;}
+  .btn{
+    padding:14px 26px; border-radius:var(--radius); font-size:14px; font-weight:500;
+    display:inline-flex; align-items:center; gap:8px; transition:all .2s;
+  }
+  .btn-primary{background:var(--accent); color:var(--bg-deep);}
+  .btn-primary:hover{background:#ff8265; transform:translateY(-1px);}
+  .btn-ghost{border:1px solid var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* ---------- reveal ---------- */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- Section intros ---------- */
+  .section-head{max-width:620px; margin-bottom:56px;}
+  .section-title{font-size:clamp(30px, 4vw, 44px); margin-bottom:14px;}
+  .section-sub{color:var(--muted); font-size:16px;}
+  .hl{
+    position:relative; color:var(--ink); white-space:nowrap;
+  }
+  .hl svg{position:absolute; left:-4%; right:-4%; bottom:-0.18em; width:108%; height:0.5em; z-index:-1; overflow:visible;}
+  .hl path{fill:none; stroke:var(--accent); stroke-width:6; stroke-linecap:round; stroke-dasharray:400; stroke-dashoffset:400; transition:stroke-dashoffset 0.9s cubic-bezier(.65,0,.35,1);}
+  .hl.in path{stroke-dashoffset:0;}
+
+  /* ---------- Project cards ---------- */
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  @media (max-width:900px){.grid-3{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; display:flex; flex-direction:column; position:relative;
+    transition:border-color .25s, transform .25s;
+  }
+  .card:hover{border-color:var(--accent); transform:translateY(-4px);}
+  .card-corner{position:absolute; width:14px; height:14px; border-color:var(--muted-2); opacity:.6;}
+  .card-corner.tl{top:8px; left:8px; border-top:1px solid; border-left:1px solid;}
+  .card-corner.tr{top:8px; right:8px; border-top:1px solid; border-right:1px solid;}
+
+  .card-visual{
+    height:160px; background:
+      repeating-linear-gradient(45deg, var(--panel-2) 0 2px, transparent 2px 14px),
+      var(--bg-deep);
+    display:flex; align-items:center; justify-content:center;
+    border-bottom:1px solid var(--line);
+  }
+  .card-visual .ph{font-family:'JetBrains Mono'; font-size:11px; color:var(--muted-2); letter-spacing:.06em;}
+
+  .card-body{padding:22px; display:flex; flex-direction:column; gap:10px; flex:1;}
+  .card-tag{font-family:'JetBrains Mono'; font-size:11px; color:var(--accent); letter-spacing:.06em;}
+  .card-title{font-size:18px; font-weight:600;}
+  .card-desc{font-size:14px; color:var(--muted); flex:1;}
+  .card-stack{font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted-2); padding-top:10px; border-top:1px solid var(--line-soft);}
+  .card-link{font-size:13px; color:var(--ink); display:inline-flex; gap:6px; align-items:center; margin-top:6px;}
+  .card-link:hover{color:var(--accent);}
+
+  .more-cta{margin-top:40px; font-size:14px; color:var(--muted); display:flex; align-items:center; gap:10px;}
+  .more-cta a{color:var(--accent); border-bottom:1px solid transparent; transition:border-color .2s;}
+  .more-cta a:hover{border-color:var(--accent);}
+
+  /* ---------- Teaching stats ---------- */
+  .teach-layout{display:grid; grid-template-columns:1fr 1.1fr; gap:60px; align-items:start;}
+  @media (max-width:860px){.teach-layout{grid-template-columns:1fr; gap:40px;}}
+
+  .stat-row{display:flex; gap:0; margin-top:36px; border-top:1px solid var(--line);}
+  .stat{flex:1; padding:18px 0; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .n{font-family:'Space Grotesk'; font-size:34px; color:var(--accent);}
+  .stat .l{font-family:'JetBrains Mono'; font-size:11px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.05em; margin-top:4px;}
+
+  .gallery-tabs-label{font-family:'JetBrains Mono'; font-size:12px; color:var(--muted-2); letter-spacing:.05em; margin-bottom:14px; text-transform:uppercase;}
+  .photo-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .photo-grid .tile{
+    aspect-ratio:1; background:var(--panel); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono';
+    font-size:10px; color:var(--muted-2); transition:border-color .2s;
+  }
+  .photo-grid .tile:hover{border-color:var(--accent);}
+
+  .quote-card{
+    margin-top:20px; padding:20px; background:var(--panel); border:1px solid var(--line);
+    border-left:2px solid var(--accent);
+  }
+  .quote-card p{font-size:14.5px; color:var(--ink); margin:0 0 10px;}
+  .quote-card .who{font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted-2);}
+
+  /* ---------- Design / 3D ---------- */
+  .tabs{display:flex; gap:10px; margin-bottom:32px;}
+  .tab-btn{
+    padding:10px 20px; border:1px solid var(--line); border-radius:var(--radius);
+    font-size:13px; color:var(--muted); background:transparent;
+  }
+  .tab-btn.active{border-color:var(--accent); color:var(--ink); background:var(--accent-dim);}
+
+  .masonry{
+    display:grid; grid-template-columns:repeat(4, 1fr); grid-auto-rows:90px; gap:10px;
+  }
+  @media (max-width:760px){.masonry{grid-template-columns:repeat(2,1fr);}}
+  .mtile{
+    background:var(--panel); border:1px solid var(--line); display:flex; align-items:flex-end;
+    padding:10px; font-family:'JetBrains Mono'; font-size:10.5px; color:var(--muted-2);
+    transition:border-color .2s, transform .2s; position:relative; overflow:hidden;
+  }
+  .mtile:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .mtile.r2{grid-row:span 2;}
+  .mtile.c2{grid-column:span 2;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ---------- Contact ---------- */
+  .contact-layout{display:grid; grid-template-columns:1fr 1fr; gap:60px;}
+  @media (max-width:860px){.contact-layout{grid-template-columns:1fr; gap:44px;}}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;}
+  .field input, .field textarea{
+    width:100%; background:var(--panel); border:1px solid var(--line); color:var(--ink);
+    padding:12px 14px; font-family:'Inter'; font-size:14px; border-radius:var(--radius);
+    transition:border-color .2s;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--accent); outline:none;}
+  .field textarea{resize:vertical; min-height:100px;}
+
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    padding:9px 14px; border:1px solid var(--line); border-radius:var(--radius); font-size:13px;
+    color:var(--muted); background:transparent;
+  }
+  .chip.sel{border-color:var(--accent); color:var(--ink); background:var(--accent-dim);}
+
+  .social-list{display:flex; flex-direction:column; gap:10px;}
+  .social-card{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:18px 20px; background:var(--panel); border:1px solid var(--line);
+    transition:border-color .2s, transform .2s;
+  }
+  .social-card:hover{border-color:var(--accent); transform:translateX(3px);}
+  .social-card .left{display:flex; align-items:center; gap:14px;}
+  .social-icon{
+    width:36px; height:36px; border:1px solid var(--line); border-radius:var(--radius);
+    display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk';
+    font-size:14px; flex-shrink:0;
+  }
+  .social-card .name{font-size:14.5px; font-weight:500;}
+  .social-card .desc{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .social-card .arrow{color:var(--muted-2); transition:color .2s, transform .2s;}
+  .social-card:hover .arrow{color:var(--accent); transform:translateX(2px);}
+
+  /* ---------- Footer ---------- */
+  footer{padding:40px 0 60px;}
+  .foot-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted-2);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-mark">АЛЕКСАНДР<span class="dot">.</span></div>
+    <div class="nav-links">
+      <a href="#projects">Разработка</a>
+      <a href="#teaching">Преподавание</a>
+      <a href="#design">Дизайн&nbsp;&amp;&nbsp;3D</a>
+      <a href="#contact">Контакты</a>
+    </div>
+    <a href="#contact" class="nav-cta">Написать</a>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero wrap">
+  <div class="hero-eyebrow"><span class="blink"></span> ЛИЧНЫЙ ЛОГ · SHEET 00/04 · ОБНОВЛЕНО ИЮНЬ 2026</div>
+
+  <h1 class="hero-name">
+    Александр
+    <span class="mark" aria-hidden="true">
+      <svg viewBox="0 0 600 40" preserveAspectRatio="none">
+        <path d="M8,28 C120,8 420,38 592,14" />
+      </svg>
+    </span>
+  </h1>
+
+  <div class="hero-tags">
+    <span>Разработка</span><span>3D-графика</span><span>Обучение</span>
+  </div>
+
+  <p class="hero-text">
+    Пишу код, строю формы в трёх измерениях и учу детей не бояться технологий.
+    Ниже — рабочий журнал: проекты, программы и работы, которые из этого получились.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#projects" class="btn btn-primary">Смотреть работы ↓</a>
+    <a href="#contact" class="btn btn-ghost">Написать →</a>
+  </div>
+</header>
+
+<!-- ===================== PROJECTS ===================== -->
+<section id="projects" class="wrap">
+  <div class="sheet-label"><span class="num">01/04</span><span class="rule"></span><span class="name">Разработка</span></div>
+
+  <div class="section-head reveal">
+    <h2 class="section-title">Пишу код, который<br>
+      <span class="hl">решает задачи<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4,14 C90,4 220,18 296,8"/></svg></span>
+    </h2>
+    <p class="section-sub">От внутренних рабочих систем до клиентских веб-сервисов — инструменты, которыми пользуются каждый день, а не просто демо.</p>
+  </div>
+
+  <div class="grid-3">
+    <article class="card reveal">
+      <span class="card-corner tl"></span><span class="card-corner tr"></span>
+      <div class="card-visual"><span class="ph">[ скрин интерфейса ]</span></div>
+      <div class="card-body">
+        <span class="card-tag">PRJ-01 · WEB</span>
+        <h3 class="card-title">Учёт абонементов для спортзала</h3>
+        <p class="card-desc">Веб-сервис для автоматизации продаж и контроля посещений: клиенты, сроки абонементов, напоминания, аналитика по залу.</p>
+        <div class="card-stack mono">stack: [технологии]</div>
+        <a href="#" class="card-link">Подробнее →</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <span class="card-corner tl"></span><span class="card-corner tr"></span>
+      <div class="card-visual"><span class="ph">[ скрин таблицы расчётов ]</span></div>
+      <div class="card-body">
+        <span class="card-tag">PRJ-02 · INTERNAL TOOL</span>
+        <h3 class="card-title">Расчёт зарплат — CyberOne</h3>
+        <p class="card-desc">Внутренний инструмент для IT-школы: автоматизация расчёта зарплат преподавателей по часам, ставкам и бонусам. Заменил ручной Excel-учёт.</p>
+        <div class="card-stack mono">stack: [технологии]</div>
+        <a href="#" class="card-link">Подробнее →</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <span class="card-corner tl"></span><span class="card-corner tr"></span>
+      <div class="card-visual"><span class="ph">[ скрин лендинга ]</span></div>
+      <div class="card-body">
+        <span class="card-tag">PRJ-03 · WEB</span>
+        <h3 class="card-title">Сайт авторских курсов цифровой грамотности</h3>
+        <p class="card-desc">Лендинг и личный кабинет для курсов: от знакомства с темой до записи и онбординга учеников.</p>
+        <div class="card-stack mono">stack: [технологии]</div>
+        <a href="#" class="card-link">Подробнее →</a>
+      </div>
+    </article>
+  </div>
+
+  <p class="more-cta reveal">Нужен похожий инструмент для вашего бизнеса? <a href="#contact">Обсудить проект →</a></p>
+</section>
+
+<!-- ===================== TEACHING ===================== -->
+<section id="teaching" class="wrap">
+  <div class="sheet-label"><span class="num">02/04</span><span class="rule"></span><span class="name">Преподавание</span></div>
+
+  <div class="teach-layout">
+    <div class="reveal">
+      <h2 class="section-title">Учу детей<br>создавать, а не<br>
+        <span class="hl">бояться технологий<svg viewBox="0 0 320 20" preserveAspectRatio="none"><path d="M4,14 C100,4 240,18 316,8"/></svg></span>
+      </h2>
+      <p class="section-sub" style="margin-top:18px;">
+        Уже 2 года я провожу занятия по IT, дизайну и нейросетям для детей и подростков.
+        Это не про «пройти курс» — это про то, чтобы ребёнок начал сам создавать.
+        Учебную программу по цифровой грамотности я разработал с нуля и сам провёл по ней десятки учеников.
+      </p>
+
+      <div class="stat-row">
+        <div class="stat"><div class="n">2+</div><div class="l">года с детьми</div></div>
+        <div class="stat"><div class="n">N</div><div class="l">учебных модулей</div></div>
+        <div class="stat"><div class="n">N</div><div class="l">учеников</div></div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="gallery-tabs-label">Как проходят занятия</div>
+      <div class="photo-grid">
+        <div class="tile">фото 1</div><div class="tile">фото 2</div><div class="tile">фото 3</div>
+        <div class="tile">фото 4</div><div class="tile">фото 5</div><div class="tile">фото 6</div>
+      </div>
+
+      <div class="quote-card">
+        <p>«Здесь будет короткий отзыв ученика или родителя — пара предложений о том, что изменилось после занятий.»</p>
+        <div class="who">— имя, родитель / ученик</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DESIGN / 3D ===================== -->
+<section id="design" class="wrap">
+  <div class="sheet-label"><span class="num">03/04</span><span class="rule"></span><span class="name">Дизайн &amp; 3D</span></div>
+
+  <div class="section-head reveal">
+    <h2 class="section-title">
+      <span class="hl">Форма имеет значение<svg viewBox="0 0 380 20" preserveAspectRatio="none"><path d="M4,14 C120,4 280,18 376,8"/></svg></span>
+    </h2>
+    <p class="section-sub">Два направления, одна цель — сделать вещи, на которые приятно смотреть.</p>
+  </div>
+
+  <div class="tabs reveal" role="tablist">
+    <button class="tab-btn active" data-tab="blender" role="tab" aria-selected="true">3D / Blender</button>
+    <button class="tab-btn" data-tab="figma" role="tab" aria-selected="false">Графика / Figma</button>
+  </div>
+
+  <div class="tab-panel active reveal" data-panel="blender">
+    <div class="masonry">
+      <div class="mtile r2">рендер 01</div>
+      <div class="mtile">рендер 02</div>
+      <div class="mtile c2">рендер 03 — продукт</div>
+      <div class="mtile">рендер 04</div>
+      <div class="mtile r2">рендер 05</div>
+      <div class="mtile">рендер 06</div>
+      <div class="mtile">рендер 07</div>
+    </div>
+  </div>
+
+  <div class="tab-panel reveal" data-panel="figma">
+    <div class="masonry">
+      <div class="mtile c2">обложка Instagram 01</div>
+      <div class="mtile">UI-экран 02</div>
+      <div class="mtile r2">UI-экран 03</div>
+      <div class="mtile">обложка 04</div>
+      <div class="mtile">обложка 05</div>
+      <div class="mtile c2">UI-flow 06</div>
+    </div>
+  </div>
+
+  <p class="more-cta reveal">Полное портфолио живёт на Behance/ArtStation. <a href="#contact">Запросить ссылку →</a></p>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact" class="wrap">
+  <div class="sheet-label"><span class="num">04/04</span><span class="rule"></span><span class="name">Контакты</span></div>
+
+  <div class="section-head reveal">
+    <h2 class="section-title">Готов обсудить<br>ваш проект</h2>
+    <p class="section-sub">Разработка, 3D, дизайн или обучение — расскажите, что нужно, предложу решение.</p>
+  </div>
+
+  <div class="contact-layout">
+    <form class="reveal" onsubmit="event.preventDefault(); this.querySelector('.field-status').textContent='Спасибо! Сообщение сохранено (демо-форма).';">
+      <div class="field">
+        <label for="f-name">Имя</label>
+        <input id="f-name" type="text" placeholder="Как вас зовут">
+      </div>
+      <div class="field">
+        <label for="f-contact">Email / Telegram</label>
+        <input id="f-contact" type="text" placeholder="you@example.com или @username">
+      </div>
+      <div class="field">
+        <label>Тип задачи</label>
+        <div class="chip-row" id="chipRow">
+          <button type="button" class="chip">Разработка</button>
+          <button type="button" class="chip">3D / Дизайн</button>
+          <button type="button" class="chip">Обучение</button>
+          <button type="button" class="chip">Другое</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-msg">Сообщение</label>
+        <textarea id="f-msg" placeholder="Коротко о задаче"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Отправить →</button>
+      <p class="field-status mono" style="margin-top:14px; font-size:12.5px; color:var(--accent);"></p>
+    </form>
+
+    <div class="reveal">
+      <div class="social-list">
+        <a href="#" class="social-card">
+          <div class="left"><div class="social-icon">GH</div>
+            <div><div class="name">GitHub</div><div class="desc">Код и репозитории</div></div>
+          </div><span class="arrow">→</span>
+        </a>
+        <a href="#" class="social-card">
+          <div class="left"><div class="social-icon">Be</div>
+            <div><div class="name">Behance / ArtStation</div><div class="desc">Дизайн и 3D-портфолио</div></div>
+          </div><span class="arrow">→</span>
+        </a>
+        <a href="#" class="social-card">
+          <div class="left"><div class="social-icon">Ig</div>
+            <div><div class="name">Instagram</div><div class="desc">Закулисье и процесс</div></div>
+          </div><span class="arrow">→</span>
+        </a>
+        <a href="#" class="social-card">
+          <div class="left"><div class="social-icon">Tg</div>
+            <div><div class="name">Telegram</div><div class="desc">Написать напрямую</div></div>
+          </div><span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <div class="foot-row">
+    <span>© 2026 АЛЕКСАНДР — РАЗРАБОТКА · 3D · ОБУЧЕНИЕ</span>
+    <span>SHEET 04/04 — КОНЕЦ ЖУРНАЛА</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>obs.observe(el));
+
+  // Underline-draw on headline highlights
+  const hls = document.querySelectorAll('.hl');
+  const hlObs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+  }, {threshold:0.4});
+  hls.forEach(el=>hlObs.observe(el));
+
+  // Tabs
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>{b.classList.remove('active'); b.setAttribute('aria-selected','false');});
+      panels.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+      document.querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+    });
+  });
+
+  // Chip multi-toggle (single select feel, but allow multi for task type)
+  document.querySelectorAll('#chipRow .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=> chip.classList.toggle('sel'));
+  });
+</script>
+
+</body>
+</html>
